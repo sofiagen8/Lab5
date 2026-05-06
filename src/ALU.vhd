@@ -47,6 +47,7 @@ component ripple_adder is
            Cin : in STD_LOGIC;
            S : out STD_LOGIC_VECTOR (7 downto 0);
            Cout : out STD_LOGIC);
+           
 end component ripple_adder;
     
     signal w_add : std_logic_vector(7 downto 0);
@@ -55,6 +56,7 @@ end component ripple_adder;
     signal w_out : std_logic;
 
 begin
+
     w_A <= i_A;
     w_B <= i_B when (i_op(0) = '0') else
             NOT(i_B); --need to add 1 still?
@@ -73,6 +75,15 @@ begin
                     (i_A and i_B) when (i_op = "010") else
                     (i_A or i_B) when (i_op = "100" ) else --changed from 011 for 1-hot
                     "00000000";
-      o_flags <= "0"; --next steps, look through what flags should be attached to
+      --NZCV (keep in that order, 3-N, 2-Z, C-1, V-0
+      
+      --overflow (V-0)
+      o_flags(0) <= (i_op(0) xnor i_A(7) xnor i_B(7)) and (i_A(7) xor w_add(7)) and (not(i_op(1))); 
+      --carry (C-1)
+      o_flags(1) <= w_out and i_op(1);
+      --negative (3-N)
+      o_flags(3) <= w_add(7); --7 is most significant bit
+      --zero (Z-2)
+      o_flags(2) <= NOT(w_add(0) or w_add(1) or w_add(2) or w_add(3) or w_add(4) or w_add(5) or w_add(6) or w_add(7));
 
 end Behavioral;
