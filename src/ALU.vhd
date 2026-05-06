@@ -50,22 +50,29 @@ component ripple_adder is
 end component ripple_adder;
     
     signal w_add : std_logic_vector(7 downto 0);
+    signal w_A : std_logic_vector(7 downto 0);
+    signal w_B : std_logic_vector(7 downto 0);
     signal w_out : std_logic;
 
 begin
+    w_A <= i_A;
+    w_B <= i_B when (i_op(0) = '0') else
+            NOT(i_B); --need to add 1 still?
+            
     ripple_adder_inst: ripple_adder port map(
-        A=> i_A,
-        B=> i_B,
+        A=> w_A,
+        B=> w_B,
         Cin => i_op(0),
         S => w_add,
         Cout => w_out
     );
     
+ 
       o_result <= (w_add) when (i_op = "000") else
-                    (NOT(w_add)) when (i_op = "001") else
+                    (w_add) when (i_op = "001") else --diagram puts B through a MUX, not even sure if current code works
                     (i_A and i_B) when (i_op = "010") else
                     (i_A or i_B) when (i_op = "100" ) else --changed from 011 for 1-hot
-                    "0000000";
-      o_flags <= "0";
+                    "00000000";
+      o_flags <= "0"; --next steps, look through what flags should be attached to
 
 end Behavioral;
