@@ -80,10 +80,11 @@ begin
       --overflow (V-0)
       o_flags(0) <= (i_op(0) xnor i_A(7) xnor i_B(7)) and (i_A(7) xor w_add(7)) and (not(i_op(1))); 
       --carry (C-1)
-      o_flags(1) <= w_out and i_op(1);
+      o_flags(1) <= w_out and not(i_op(1));
       --negative (3-N)
       o_flags(3) <= w_add(7); --7 is most significant bit
       --zero (Z-2)
-      o_flags(2) <= NOT(w_add(0) or w_add(1) or w_add(2) or w_add(3) or w_add(4) or w_add(5) or w_add(6) or w_add(7));
+      o_flags(2) <= (not(w_add(0)) and not(w_add(1)) and not(w_add(2)) and not(w_add(3)) and not(w_add(4)) and not(w_add(5)) and not(w_add(6)) and not(w_add(7)));
+      --o_flags(1) <= NOT(w_add(0) or w_add(1) or w_add(2) or w_add(3) or w_add(4) or w_add(5) or w_add(6) or w_add(7));
 
 end Behavioral;

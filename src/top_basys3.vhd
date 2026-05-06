@@ -104,12 +104,29 @@ end component ALU;
     signal w_cycle : std_logic_vector(3 downto 0); --signal from controller fsm
     signal w_clk : std_logic; --signal from clock divider
     signal w_results : std_logic_vector(7 downto 0); --signal from ALU to MUX
+    signal w_a :std_logic_vector(7 downto 0); --signal from register to ALU
+    signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
   
 begin
 	-- PORT MAPS ----------------------------------------
-
+    ALU_instance: ALU port map(
+        i_A => w_a,
+        i_B => w_b,
+        i_op(2) => sw(2),
+        i_op(1) => sw(1),
+        i_op(0) => sw(0),
+        o_result => w_result, 
+        
+        o_flags(3) => led(15),
+        o_flags(2) => led(14),
+        o_flags(1) => led(13),
+        o_flags(0) => led(12)
+        
+    );
 	
-	
+	--start by building out everything except ALU, 
+	--get lights to work in order through clicking the button, then add ALU
+	--the d-flip flops will be implemented as processes
 	-- CONCURRENT STATEMENTS ----------------------------
 	
 	
