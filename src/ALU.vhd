@@ -54,7 +54,8 @@ end component ripple_adder;
     signal w_A : std_logic_vector(7 downto 0);
     signal w_B : std_logic_vector(7 downto 0);
     signal w_out : std_logic;
-
+    signal w_result : std_logic_vector(7 downto 0);
+    
 begin
 
     w_A <= i_A;
@@ -70,21 +71,24 @@ begin
     );
     
  
-      o_result <= (w_add) when (i_op = "000") else
+      w_result <= (w_add) when (i_op = "000") else
                     (w_add) when (i_op = "001") else --diagram puts B through a MUX, not even sure if current code works
                     (i_A and i_B) when (i_op = "010") else
                     (i_A or i_B) when (i_op = "100" ) else --changed from 011 for 1-hot
                     "00000000";
+                    
+      o_result <= w_result; --creation of signal helps with proper flag creation
+                    
       --NZCV (keep in that order, 3-N, 2-Z, C-1, V-0
       
-      --overflow (V-0)
-      o_flags(0) <= (i_op(0) xnor i_A(7) xnor i_B(7)) and (i_A(7) xor w_add(7)) and (not(i_op(1))); 
+      --overflow (V-0) 
+      o_flags(0) <= not((i_op(0) xor i_A(7) xor i_B(7))) and (i_A(7) xor w_add(7)) and (not(i_op(1))); 
       --carry (C-1)
       o_flags(1) <= w_out and not(i_op(1));
-      --negative (3-N)
-      o_flags(3) <= w_add(7); --7 is most significant bit
-      --zero (Z-2)
-      o_flags(2) <= (not(w_add(0)) and not(w_add(1)) and not(w_add(2)) and not(w_add(3)) and not(w_add(4)) and not(w_add(5)) and not(w_add(6)) and not(w_add(7)));
+      --negative (3-N) --should take from ALU results
+      o_flags(3) <= w_result(7); --7 is most significant bit
+      --zero (Z-2) --should take from ALU results
+      o_flags(2) <= (not(w_result(0)) and not(w_result(1)) and not(w_result(2)) and not(w_result(3)) and not(w_result(4)) and not(w_result(5)) and not(w_result(6)) and not(w_result(7)));
       --o_flags(1) <= NOT(w_add(0) or w_add(1) or w_add(2) or w_add(3) or w_add(4) or w_add(5) or w_add(6) or w_add(7));
 
 end Behavioral;
