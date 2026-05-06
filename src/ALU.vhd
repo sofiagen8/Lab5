@@ -39,9 +39,33 @@ entity ALU is
            o_flags : out STD_LOGIC_VECTOR (3 downto 0));
 end ALU;
 
-architecture Behavioral of ALU is
+architecture Behavioral of ALU is 
+
+component ripple_adder is
+    Port ( A : in STD_LOGIC_VECTOR (7 downto 0);
+           B : in STD_LOGIC_VECTOR (7 downto 0);
+           Cin : in STD_LOGIC;
+           S : out STD_LOGIC_VECTOR (7 downto 0);
+           Cout : out STD_LOGIC);
+end component ripple_adder;
+    
+    signal w_add : std_logic_vector(7 downto 0);
+    signal w_out : std_logic;
 
 begin
-
+    ripple_adder_inst: ripple_adder port map(
+        A=> i_A,
+        B=> i_B,
+        Cin => i_op(0),
+        S => w_add,
+        Cout => w_out
+    );
+    
+      o_result <= (w_add) when (i_op = "000") else
+                    (NOT(w_add)) when (i_op = "001") else
+                    (i_A and i_B) when (i_op = "010") else
+                    (i_A or i_B) when (i_op = "100" ) else --changed from 011 for 1-hot
+                    "0000000";
+      o_flags <= "0";
 
 end Behavioral;

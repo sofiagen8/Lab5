@@ -90,7 +90,20 @@ component controller_fsm is
            i_adv : in STD_LOGIC;
            o_cycle : out STD_LOGIC_VECTOR (3 downto 0));
 end component controller_fsm;
+ 
+component ALU is
+    Port ( i_A : in STD_LOGIC_VECTOR (7 downto 0);
+           i_B : in STD_LOGIC_VECTOR (7 downto 0);
+           i_op : in STD_LOGIC_VECTOR (2 downto 0); --input from sw(2:0)
+           o_result : out STD_LOGIC_VECTOR (7 downto 0); --send to MUX
+           o_flags : out STD_LOGIC_VECTOR (3 downto 0)); --output on LED (15:12)
+end component ALU;
 
+
+--need to add signals here
+    signal w_cycle : std_logic_vector(3 downto 0); --signal from controller fsm
+    signal w_clk : std_logic; --signal from clock divider
+    signal w_results : std_logic_vector(7 downto 0); --signal from ALU to MUX
   
 begin
 	-- PORT MAPS ----------------------------------------
