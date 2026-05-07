@@ -161,17 +161,19 @@ button_inst: button_debounce
 	
 	-- CONCURRENT STATEMENTS ---------------------------
 	led(3 downto 0) <= w_cycle;
-	
+	led(11 downto 4) <= "00000000";
     --the d-flip flops reading from the switches giving to ALU
-	flip_proc : process (w_adv, w_cycle) --no idea if this is going to work
+	flip_proc : process (w_adv, btnU)
     begin
-        if (w_adv = '1' and w_cycle = "0010") then
-            w_a<= sw; 
-        elsif (w_adv = '1' and w_cycle = "0100") then 
+        if (rising_edge(w_adv)) then
+            if (w_cycle = "0010") then
+                w_a<= sw; 
+            elsif (w_cycle = "0100") then 
             w_b <= sw; 
-        elsif (w_cycle = "0001") then
+        elsif (btnU = '1' or w_cycle = "0001") then
             w_b <= "00000000"; --reset the values
             w_a <= "00000000";
+        end if;
         end if;
     end process flip_proc;
 	
@@ -193,7 +195,7 @@ button_inst: button_debounce
     );
     
     clock_inst: clock_divider
-	generic map ( k_DIV =>2) 
+	generic map ( k_DIV =>25000) 
 	port map ( 	i_clk => clk,
 			i_reset=> btnU,		   -- asynchronous
 			o_clk   => w_clk		   -- divided (slow) clock
@@ -215,8 +217,7 @@ button_inst: button_debounce
 	
 	with w_sign select
         w_signage <= "0111111" when '1', --negative display on the seven seg?
-                 "1111111" when '0';
-	
+                 "1111111" when others;
 	with w_an select
 	   w_seg <= w_signage when "0111",
 	            w_7seg when others;
