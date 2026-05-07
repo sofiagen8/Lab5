@@ -111,6 +111,7 @@ end component button_debounce;
     signal w_result : std_logic_vector(7 downto 0); --signal from ALU to MUX
     signal w_a :std_logic_vector(7 downto 0); --signal from register to ALU
     signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
+    signal w_op : std_logic_vector(2 downto 0);
   
     signal w_sign : std_logic; --signal from twos-comp to tdm4
     signal w_signage : std_logic_vector(6 downto 0); --used to convert between signage and segments
@@ -134,9 +135,7 @@ begin
      ALU_instance: ALU port map(
         i_A => w_a,
         i_B => w_b,
-        i_op(2) => sw(2),
-        i_op(1) => sw(1),
-        i_op(0) => sw(0),
+        i_op => w_op,
         o_result => w_result, 
         o_flags(3) => led(15),
         o_flags(2) => led(14),
@@ -165,14 +164,23 @@ button_inst: button_debounce
     --the d-flip flops reading from the switches giving to ALU
 	flip_proc : process (w_adv, btnU)
     begin
-        if (rising_edge(w_adv)) then
-            if (w_cycle = "0010") then
-                w_a<= sw; 
-            elsif (w_cycle = "0100") then 
-            w_b <= sw; 
-        elsif (btnU = '1' or w_cycle = "0001") then
+       if (btnU = '1') then
             w_b <= "00000000"; --reset the values
             w_a <= "00000000";
+            w_op <="000";
+       elsif (rising_edge(w_adv)) then --working back one 
+            if (w_cycle = "0001") then
+                w_a<= sw; 
+            elsif (w_cycle = "0010") then --shifted back a state due to rising edge conflict
+                w_b <= sw; 
+            elsif (w_cycle = "0100") then 
+                w_op(0) <= sw(0);
+                w_op(1) <= sw(1);
+                w_op(2) <= sw(2);
+            elsif (w_cycle = "1000") then --need to add reset again b/c rising edge is making things lag behind
+                w_b <= "00000000"; --reset the values
+                w_a <= "00000000";
+                w_op <="000";
         end if;
         end if;
     end process flip_proc;
@@ -213,7 +221,7 @@ button_inst: button_debounce
 		   o_sel => w_an -- selected data line (one-cold)
 	);
 	
-	an <= w_an;
+	an <= "1111" when w_cycle="0001" else w_an; --adjusting to makesure state 1 is off
 	
 	with w_sign select
         w_signage <= "0111111" when '1', --negative display on the seven seg?
@@ -227,6 +235,6 @@ button_inst: button_debounce
            o_seg_n => w_7seg 
            );
     	
-   seg <= w_seg;
+   seg <= "1111111" when w_cycle="0001" else w_seg; --same as an assignment
     	
 end top_basys3_arch;
