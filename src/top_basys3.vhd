@@ -41,8 +41,7 @@ entity top_basys3 is
         an  :   out std_logic_vector(3 downto 0)
     );
 end top_basys3;
-
-
+      
 
 architecture top_basys3_arch of top_basys3 is 
   
@@ -102,20 +101,24 @@ end component ALU;
 
 --need to add signals here
     signal w_cycle : std_logic_vector(3 downto 0); --signal from controller fsm
-    --signal w_A :  std_logic_vector(7 downto 0);
-    --signal w_B:  std_logic_vector(7 downto 0);
     signal w_clk : std_logic; --signal from clock divider
     signal w_result : std_logic_vector(7 downto 0); --signal from ALU to MUX
     signal w_a :std_logic_vector(7 downto 0); --signal from register to ALU
     signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
   
-    signal w_bin : std_logic_vector(7 downto 0); --signal from mux to twos-comp
     signal w_sign : std_logic; --signal from twos-comp to tdm4
+    signal w_Dsign : std_logic_vector(3 downto 0);
     signal w_hund: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_tens: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_ones: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     
     signal w_data: std_logic_vector(3 downto 0); --signal from data to sevenseg
+    
+    --signal mux_sel : std_logic_vector(1 downto 0);
+    signal mux_d_in : std_logic_vector(7 downto 0);
+    --signal mux_f : std_logic;
+    signal w_seg : std_logic_vector(7 downto 0);
+    signal w_neg : std_logic_vector(1 downto 0);
     
 begin
 	-- PORT MAPS ----------------------------------------
@@ -139,7 +142,9 @@ controller_fsm_inst: controller_fsm port map(
 	
 	--start by building out everything except ALU, 
 	--get lights to work in order through clicking the button, then add ALU
-	--the d-flip flops will be implemented as processes
+	
+	-- CONCURRENT STATEMENTS ---------------------------
+    --the d-flip flops reading from the switches giving to ALU
 	flip_proc : process (w_cycle) --no idea if this is going to work
     begin
         if (w_cycle = "0010") then
@@ -163,32 +168,48 @@ controller_fsm_inst: controller_fsm port map(
         end if;
     end process flip_proc;
 	
-	-- CONCURRENT STATEMENTS ----------------------------
-	comp_inst: twos_comp 
+    --mux taking data from ALU or inputs, depending on state, and giving to twos comp
+    with w_cycle select
+        mux_d_in <= w_a when "0010",
+                    w_b when "0100",
+                    w_result when "1000", 
+                    "00000000" when "0001"; --default will not work too well
+                    
+    --twos comp taking from mux and giving to TDM4
+    comp_inst: twos_comp 
     port map (
-        i_bin => w_bin,
+        i_bin => mux_d_in,
         o_sign=> w_sign, --could be something wrong with this
         o_hund=> w_hund,
         o_tens=> w_tens,
         o_ones=> w_ones
     );
-  
-	tdm_inst: TDM4 
+    
+    --changing signage value to 4 bit value for i_D3 of TDM
+    with w_sign select
+        w_Dsign <= "0000" when '0',
+                   "1111" when '1'; --might need to change value, run with for now
+    
+    tdm_inst: TDM4 
 	    generic map(k_WIDTH => 4) 
         port map(  i_clk=> w_clk,
            i_reset => btnU,
-           i_D3 => "0000", --w_sign, --issue with this needs to be resolved
-		   i_D2 =>w_hund,
+           i_D3 => w_Dsign, 
+		   i_D2 => w_hund,
 		   i_D1 => w_tens,
 		   i_D0 => w_ones,
 		   o_data => w_data,
 		   o_sel => an	-- selected data line (one-cold)
 	);
 	
-	seven_inst: sevenseg_decoder --definitely an issue with seven seg decoder 
+		seven_inst: sevenseg_decoder --definitely an issue with seven seg decoder 
     Port map ( i_Hex => w_data,
-           o_seg_n => seg
+           o_seg_n => w_seg
            );
-
+    
+    --WORKING ON SEGMENT ISSUES
+    with w_Dsign select
+        w_seg <= "01111111" when "1111", --negative display on the seven seg?
+                    w_seg when "0000";
 	
 end top_basys3_arch;
