@@ -148,26 +148,12 @@ controller_fsm_inst: controller_fsm port map(
 	led(3 downto 0) <= w_cycle;
 	
     --the d-flip flops reading from the switches giving to ALU
-	flip_proc : process (w_cycle) --no idea if this is going to work
+	flip_proc : process (btnC, w_cycle) --no idea if this is going to work
     begin
-        if (w_cycle = "0010") then
-            w_a(0) <= sw(0); 
-            w_a(1) <= sw(1); 
-            w_a(2) <= sw(2); 
-            w_a(3) <= sw(3); 
-            w_a(4) <= sw(4); 
-            w_a(5) <= sw(5); 
-            w_a(6) <= sw(6); 
-            w_a(7) <= sw(7); 
-        elsif (w_cycle = "0100") then 
-            w_b(0) <= sw(0); 
-            w_b(1) <= sw(1); 
-            w_b(2) <= sw(2); 
-            w_b(3) <= sw(3); 
-            w_b(4) <= sw(4); 
-            w_b(5) <= sw(5); 
-            w_b(6) <= sw(6); 
-            w_b(7) <= sw(7); 
+        if (btnC='1' and w_cycle = "0010") then
+            w_a<= sw; 
+        elsif (btnC = '1' and w_cycle = "0100") then 
+            w_b <= sw; 
         end if;
     end process flip_proc;
 	
