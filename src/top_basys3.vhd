@@ -109,6 +109,14 @@ end component ALU;
     signal w_a :std_logic_vector(7 downto 0); --signal from register to ALU
     signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
   
+    signal w_bin : std_logic_vector(7 downto 0); --signal from mux to twos-comp
+    signal w_sign : std_logic; --signal from twos-comp to tdm4
+    signal w_hund: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
+    signal w_tens: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
+    signal w_ones: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
+    
+    signal w_data: std_logic_vector(3 downto 0); --signal from data to sevenseg
+    
 begin
 	-- PORT MAPS ----------------------------------------
     -- ALU_instance: ALU port map(
@@ -156,7 +164,31 @@ controller_fsm_inst: controller_fsm port map(
     end process flip_proc;
 	
 	-- CONCURRENT STATEMENTS ----------------------------
+	comp_inst: twos_comp 
+    port map (
+        i_bin => w_bin,
+        o_sign=> w_sign, --could be something wrong with this
+        o_hund=> w_hund,
+        o_tens=> w_tens,
+        o_ones=> w_ones
+    );
+  
+	tdm_inst: TDM4 
+	    generic map(k_WIDTH => 4) 
+        port map(  i_clk=> w_clk,
+           i_reset => btnU,
+           i_D3 => "0000", --w_sign, --issue with this needs to be resolved
+		   i_D2 =>w_hund,
+		   i_D1 => w_tens,
+		   i_D0 => w_ones,
+		   o_data => w_data,
+		   o_sel => an	-- selected data line (one-cold)
+	);
 	
-	
+	seven_inst: sevenseg_decoder --definitely an issue with seven seg decoder 
+    Port map ( i_Hex => w_data,
+           o_seg_n => seg
+           );
+
 	
 end top_basys3_arch;
