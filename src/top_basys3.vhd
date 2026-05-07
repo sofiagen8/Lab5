@@ -102,31 +102,59 @@ end component ALU;
 
 --need to add signals here
     signal w_cycle : std_logic_vector(3 downto 0); --signal from controller fsm
+    --signal w_A :  std_logic_vector(7 downto 0);
+    --signal w_B:  std_logic_vector(7 downto 0);
     signal w_clk : std_logic; --signal from clock divider
-    signal w_results : std_logic_vector(7 downto 0); --signal from ALU to MUX
+    signal w_result : std_logic_vector(7 downto 0); --signal from ALU to MUX
     signal w_a :std_logic_vector(7 downto 0); --signal from register to ALU
     signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
   
 begin
 	-- PORT MAPS ----------------------------------------
-    ALU_instance: ALU port map(
-        i_A => w_a,
-        i_B => w_b,
-        i_op(2) => sw(2),
-        i_op(1) => sw(1),
-        i_op(0) => sw(0),
-        o_result => w_result, 
-        
-        o_flags(3) => led(15),
-        o_flags(2) => led(14),
-        o_flags(1) => led(13),
-        o_flags(0) => led(12)
-        
-    );
+    -- ALU_instance: ALU port map(
+    --    i_A => w_a,
+  --      i_B => w_b,
+--        i_op(2) => sw(2),
+      --  i_op(1) => sw(1),
+    --    i_op(0) => sw(0),
+  --      o_result => w_result, 
+--        o_flags(3) => led(15),
+      --  o_flags(2) => led(14),
+    --    o_flags(1) => led(13),
+  --      o_flags(0) => led(12)
+--    );
+controller_fsm_inst: controller_fsm port map(
+           i_reset => btnU,
+           i_adv  => btnC,
+           o_cycle => w_cycle
+           );
 	
 	--start by building out everything except ALU, 
 	--get lights to work in order through clicking the button, then add ALU
 	--the d-flip flops will be implemented as processes
+	flip_proc : process (w_cycle) --no idea if this is going to work
+    begin
+        if (w_cycle = "0010") then
+            w_a(0) <= sw(0); 
+            w_a(1) <= sw(1); 
+            w_a(2) <= sw(2); 
+            w_a(3) <= sw(3); 
+            w_a(4) <= sw(4); 
+            w_a(5) <= sw(5); 
+            w_a(6) <= sw(6); 
+            w_a(7) <= sw(7); 
+        elsif (w_cycle = "0100") then 
+            w_b(0) <= sw(0); 
+            w_b(1) <= sw(1); 
+            w_b(2) <= sw(2); 
+            w_b(3) <= sw(3); 
+            w_b(4) <= sw(4); 
+            w_b(5) <= sw(5); 
+            w_b(6) <= sw(6); 
+            w_b(7) <= sw(7); 
+        end if;
+    end process flip_proc;
+	
 	-- CONCURRENT STATEMENTS ----------------------------
 	
 	
