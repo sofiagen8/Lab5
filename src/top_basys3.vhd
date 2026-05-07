@@ -98,6 +98,12 @@ component ALU is
            o_flags : out STD_LOGIC_VECTOR (3 downto 0)); --output on LED (15:12)
 end component ALU;
 
+component button_debounce is
+	Port(	clk: in  STD_LOGIC;
+			reset : in  STD_LOGIC;
+			button: in STD_LOGIC;
+			action: out STD_LOGIC);
+end component button_debounce;
 
 --need to add signals here
     signal w_cycle : std_logic_vector(3 downto 0); --signal from controller fsm
@@ -121,6 +127,8 @@ end component ALU;
     signal w_seg : std_logic_vector(6 downto 0); --finalized segment assignment
     signal w_7seg : std_logic_vector(6 downto 0); --used in 7 seg decoder
     
+    signal w_adv : std_logic;
+    
 begin
 	-- PORT MAPS ----------------------------------------
      ALU_instance: ALU port map(
@@ -137,9 +145,16 @@ begin
     );
 controller_fsm_inst: controller_fsm port map(
            i_reset => btnU,
-           i_adv  => btnC,
+           i_adv  => w_adv,
            o_cycle => w_cycle
            );
+	
+button_inst: button_debounce 
+	Port map(	clk=> clk,
+			reset => btnU, 
+			button => btnC,
+			action => w_adv
+);
 	
 	--start by building out everything except ALU, 
 	--get lights to work in order through clicking the button, then add ALU
@@ -148,12 +163,15 @@ controller_fsm_inst: controller_fsm port map(
 	led(3 downto 0) <= w_cycle;
 	
     --the d-flip flops reading from the switches giving to ALU
-	flip_proc : process (btnC, w_cycle) --no idea if this is going to work
+	flip_proc : process (w_adv, w_cycle) --no idea if this is going to work
     begin
-        if (btnC='1' and w_cycle = "0010") then
+        if (w_adv = '1' and w_cycle = "0010") then
             w_a<= sw; 
-        elsif (btnC = '1' and w_cycle = "0100") then 
+        elsif (w_adv = '1' and w_cycle = "0100") then 
             w_b <= sw; 
+        elsif (w_cycle = "0001") then
+            w_b <= "00000000"; --reset the values
+            w_a <= "00000000";
         end if;
     end process flip_proc;
 	

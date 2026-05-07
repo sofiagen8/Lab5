@@ -108,6 +108,14 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PSRCDIR/sources_1/imports/src/button_debounce.vhd">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/button_debounce.vhd"/>
+          <Attr Name="ImportTime" Val="1777476792"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PPRDIR/src/clock_divider.vhd">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -116,6 +124,14 @@
       </File>
       <File Path="$PPRDIR/src/controller_fsm.vhd">
         <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/src/counter.vhd">
+        <FileInfo>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/counter.vhd"/>
+          <Attr Name="ImportTime" Val="1777476792"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -177,6 +193,15 @@
       <File Path="$PPRDIR/src/clock_divider_tb.vhd">
         <FileInfo>
           <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sim_1/imports/src/button_debounce_tb.vhd">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/src/button_debounce_tb.vhd"/>
+          <Attr Name="ImportTime" Val="1777476792"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
