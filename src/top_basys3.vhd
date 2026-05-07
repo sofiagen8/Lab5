@@ -107,12 +107,12 @@ end component ALU;
     signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
   
     signal w_sign : std_logic; --signal from twos-comp to tdm4
-    signal w_Dsign : std_logic_vector(3 downto 0);
     signal w_hund: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_tens: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_ones: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     
     signal w_data: std_logic_vector(3 downto 0); --signal from data to sevenseg
+    signal w_an : STD_LOGIC_VECTOR (3 downto 0);	-- selected data line (one-cold)
     
     --signal mux_sel : std_logic_vector(1 downto 0);
     signal mux_d_in : std_logic_vector(7 downto 0);
@@ -122,26 +122,27 @@ end component ALU;
     
 begin
 	-- PORT MAPS ----------------------------------------
-    -- ALU_instance: ALU port map(
-    --    i_A => w_a,
-  --      i_B => w_b,
---        i_op(2) => sw(2),
-      --  i_op(1) => sw(1),
-    --    i_op(0) => sw(0),
-  --      o_result => w_result, 
---        o_flags(3) => led(15),
-      --  o_flags(2) => led(14),
-    --    o_flags(1) => led(13),
-  --      o_flags(0) => led(12),
-      --    w_cycle(0) => led(0),
-    --      w_cycle(1) => led(1),
-  --        w_cycle(2) => led(2),
---          w_cycle(3) => led(3),
---    );
+     ALU_instance: ALU port map(
+        i_A => w_a,
+        i_B => w_b,
+        i_op(2) => sw(2),
+        i_op(1) => sw(1),
+        i_op(0) => sw(0),
+        o_result => w_result, 
+        o_flags(3) => led(15),
+        o_flags(2) => led(14),
+        o_flags(1) => led(13),
+        o_flags(0) => led(12)
+    );
 controller_fsm_inst: controller_fsm port map(
            i_reset => btnU,
            i_adv  => btnC,
            o_cycle => w_cycle
+           
+          --w_cycle(0) => led(0),
+          --w_cycle(1) => led(1),
+          --w_cycle(2) => led(2),
+          --w_cycle(3) => led(3),
            );
 	
 	--start by building out everything except ALU, 
@@ -177,28 +178,24 @@ controller_fsm_inst: controller_fsm port map(
         mux_d_in <= w_a when "0010",
                     w_b when "0100",
                     w_result when "1000", 
-                    "00000000" when "0001"; --default will not work too well
+                    "11111111" when "0001"; --default will not work too well
                     
     --twos comp taking from mux and giving to TDM4
     comp_inst: twos_comp 
     port map (
         i_bin => mux_d_in,
-        o_sign=> w_sign, --could be something wrong with this
+        o_sign=> w_sign, 
         o_hund=> w_hund,
         o_tens=> w_tens,
         o_ones=> w_ones
     );
     
-    --changing signage value to 4 bit value for i_D3 of TDM
-    with w_sign select
-        w_Dsign <= "0000" when '0',
-                   "1111" when '1'; --might need to change value, run with for now
-    
+
     tdm_inst: TDM4 
 	    generic map(k_WIDTH => 4) 
         port map(  i_clk=> w_clk,
            i_reset => btnU,
-           i_D3 => w_Dsign, 
+           i_D3 => "0000", 
 		   i_D2 => w_hund,
 		   i_D1 => w_tens,
 		   i_D0 => w_ones,
@@ -212,8 +209,8 @@ controller_fsm_inst: controller_fsm port map(
            );
     
     --WORKING ON SEGMENT ISSUES
-    with w_Dsign select
-        w_seg <= "01111111" when "1111", --negative display on the seven seg?
-                    w_seg when "0000";
+    with w_sign select
+        w_seg <= "01111111" when '1', --negative display on the seven seg?
+                 "11111111" when '0';
 	
 end top_basys3_arch;
