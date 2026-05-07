@@ -132,7 +132,11 @@ begin
 --        o_flags(3) => led(15),
       --  o_flags(2) => led(14),
     --    o_flags(1) => led(13),
-  --      o_flags(0) => led(12)
+  --      o_flags(0) => led(12),
+      --    w_cycle(0) => led(0),
+    --      w_cycle(1) => led(1),
+  --        w_cycle(2) => led(2),
+--          w_cycle(3) => led(3),
 --    );
 controller_fsm_inst: controller_fsm port map(
            i_reset => btnU,
