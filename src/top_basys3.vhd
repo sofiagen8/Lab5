@@ -107,6 +107,7 @@ end component ALU;
     signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
   
     signal w_sign : std_logic; --signal from twos-comp to tdm4
+    signal w_signage : std_logic_vector(7 downto 0);
     signal w_hund: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_tens: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_ones: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
@@ -118,7 +119,6 @@ end component ALU;
     signal mux_d_in : std_logic_vector(7 downto 0);
     --signal mux_f : std_logic;
     signal w_seg : std_logic_vector(6 downto 0);
-    signal w_neg : std_logic_vector(1 downto 0);
     
 begin
 	-- PORT MAPS ----------------------------------------
@@ -203,17 +203,24 @@ controller_fsm_inst: controller_fsm port map(
 		   i_D1 => w_tens,
 		   i_D0 => w_ones,
 		   o_data => w_data,
-		   o_sel => an	-- selected data line (one-cold)
+		   o_sel => w_an -- selected data line (one-cold)
 	);
 	
-		seven_inst: sevenseg_decoder --definitely an issue with seven seg decoder 
+	an <= w_an;
+	
+	with w_sign select
+        w_signage <= "0111111" when '1', --negative display on the seven seg?
+                 "1111111" when '0';
+	
+	with w_an select
+	   w_seg <= w_signage when "0111",
+	            w_seg when others;
+	
+	seven_inst: sevenseg_decoder --definitely an issue with seven seg decoder 
     Port map ( i_Hex => w_data,
            o_seg_n => w_seg
            );
-    
-    --WORKING ON SEGMENT ISSUES
-    with w_sign select
-        w_seg <= "01111111" when '1', --negative display on the seven seg?
-                 "11111111" when '0';
-	
+    	
+   seg <= w_seg;
+    	
 end top_basys3_arch;
