@@ -117,7 +117,7 @@ end component ALU;
     --signal mux_sel : std_logic_vector(1 downto 0);
     signal mux_d_in : std_logic_vector(7 downto 0);
     --signal mux_f : std_logic;
-    signal w_seg : std_logic_vector(7 downto 0);
+    signal w_seg : std_logic_vector(6 downto 0);
     signal w_neg : std_logic_vector(1 downto 0);
     
 begin
@@ -138,17 +138,14 @@ controller_fsm_inst: controller_fsm port map(
            i_reset => btnU,
            i_adv  => btnC,
            o_cycle => w_cycle
-           
-          --w_cycle(0) => led(0),
-          --w_cycle(1) => led(1),
-          --w_cycle(2) => led(2),
-          --w_cycle(3) => led(3),
            );
 	
 	--start by building out everything except ALU, 
 	--get lights to work in order through clicking the button, then add ALU
 	
 	-- CONCURRENT STATEMENTS ---------------------------
+	led(3 downto 0) <= w_cycle;
+	
     --the d-flip flops reading from the switches giving to ALU
 	flip_proc : process (w_cycle) --no idea if this is going to work
     begin
@@ -178,7 +175,7 @@ controller_fsm_inst: controller_fsm port map(
         mux_d_in <= w_a when "0010",
                     w_b when "0100",
                     w_result when "1000", 
-                    "11111111" when "0001"; --default will not work too well
+                    "11111111" when others; 
                     
     --twos comp taking from mux and giving to TDM4
     comp_inst: twos_comp 
@@ -190,6 +187,12 @@ controller_fsm_inst: controller_fsm port map(
         o_ones=> w_ones
     );
     
+    clock_inst: clock_divider
+	generic map ( k_DIV =>2) 
+	port map ( 	i_clk => clk,
+			i_reset=> btnU,		   -- asynchronous
+			o_clk   => w_clk		   -- divided (slow) clock
+	);
 
     tdm_inst: TDM4 
 	    generic map(k_WIDTH => 4) 
