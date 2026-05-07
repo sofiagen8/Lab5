@@ -107,7 +107,7 @@ end component ALU;
     signal w_b : std_logic_vector(7 downto 0); --signal from register to ALU
   
     signal w_sign : std_logic; --signal from twos-comp to tdm4
-    signal w_signage : std_logic_vector(7 downto 0);
+    signal w_signage : std_logic_vector(6 downto 0); --used to convert between signage and segments
     signal w_hund: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_tens: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
     signal w_ones: std_logic_vector(3 downto 0); --signal from twos-comp to tdm4
@@ -118,7 +118,8 @@ end component ALU;
     --signal mux_sel : std_logic_vector(1 downto 0);
     signal mux_d_in : std_logic_vector(7 downto 0);
     --signal mux_f : std_logic;
-    signal w_seg : std_logic_vector(6 downto 0);
+    signal w_seg : std_logic_vector(6 downto 0); --finalized segment assignment
+    signal w_7seg : std_logic_vector(6 downto 0); --used in 7 seg decoder
     
 begin
 	-- PORT MAPS ----------------------------------------
@@ -214,11 +215,11 @@ controller_fsm_inst: controller_fsm port map(
 	
 	with w_an select
 	   w_seg <= w_signage when "0111",
-	            w_seg when others;
+	            w_7seg when others;
 	
 	seven_inst: sevenseg_decoder --definitely an issue with seven seg decoder 
     Port map ( i_Hex => w_data,
-           o_seg_n => w_seg
+           o_seg_n => w_7seg 
            );
     	
    seg <= w_seg;
