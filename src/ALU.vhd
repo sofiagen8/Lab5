@@ -52,6 +52,8 @@ end component ripple_adder;
     signal w_add : std_logic_vector(7 downto 0);
     signal w_A : std_logic_vector(7 downto 0);
     signal w_B : std_logic_vector(7 downto 0);
+    signal w_or : std_logic_vector(7 downto 0);
+    signal w_and : std_logic_vector(7 downto 0);
     signal w_out : std_logic;
     signal w_result : std_logic_vector(7 downto 0);
     
@@ -60,6 +62,8 @@ begin
     w_A <= i_A;
     w_B <= i_B when (i_op(0) = '0') else
             NOT(i_B); --need to add 1 still?
+    w_or <= i_A or i_B;
+    w_and <= i_A and i_B;
             
     ripple_adder_inst: ripple_adder port map(
         A=> w_A,
@@ -72,8 +76,8 @@ begin
  
       w_result <= (w_add) when (i_op = "000") else
                     (w_add) when (i_op = "001") else --diagram puts B through a MUX, not even sure if current code works
-                    (i_A and i_B) when (i_op = "010") else
-                    (i_A or i_B) when (i_op = "100" ) else --changed from 011 for 1-hot
+                    (w_or) when (i_op = "010") else
+                    (w_and) when (i_op = "100" ) else --changed from 011 for 1-hot
                     "00000000";
                     
       o_result <= w_result; --creation of signal helps with proper flag creation
