@@ -40,7 +40,6 @@ entity ALU is
 end ALU;
 
 architecture Behavioral of ALU is 
-
 component ripple_adder is
     Port ( A : in STD_LOGIC_VECTOR (7 downto 0);
            B : in STD_LOGIC_VECTOR (7 downto 0);
